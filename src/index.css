@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 280 60% 12%;
+    --foreground: 50 100% 95%;
+
+    --card: 280 40% 18%;
+    --card-foreground: 50 100% 95%;
+
+    --popover: 280 40% 18%;
+    --popover-foreground: 50 100% 95%;
+
+    --primary: 330 85% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 60% 65%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 280 30% 22%;
+    --muted-foreground: 280 20% 70%;
+
+    --accent: 45 100% 65%;
+    --accent-foreground: 45 80% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 280 30% 28%;
+    --input: 280 30% 25%;
+    --ring: 330 85% 60%;
+
+    --radius: 1rem;
+
+    --mint: 160 60% 55%;
+    --mint-foreground: 160 40% 95%;
+    --lavender: 270 60% 70%;
+    --lavender-foreground: 270 40% 95%;
+    --peach: 15 90% 70%;
+    --peach-foreground: 15 50% 95%;
+    --sky: 200 70% 65%;
+    --sky-foreground: 200 40% 95%;
+    --gold: 45 100% 60%;
+    --gold-foreground: 45 80% 10%;
+
+    --glass-bg: 280 40% 20% / 0.5;
+    --glass-border: 330 60% 50% / 0.25;
+
+    --sidebar-background: 280 40% 10%;
+    --sidebar-foreground: 50 100% 95%;
+    --sidebar-primary: 330 85% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 280 30% 22%;
+    --sidebar-accent-foreground: 50 100% 95%;
+    --sidebar-border: 280 30% 28%;
+    --sidebar-ring: 330 85% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Baloo 2', cursive;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: hsla(var(--glass-bg));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsla(var(--glass-border));
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .gradient-bg {
+    background: linear-gradient(135deg, 
+      hsl(280 60% 12%) 0%, 
+      hsl(300 50% 18%) 25%, 
+      hsl(330 60% 15%) 50%, 
+      hsl(260 50% 16%) 75%, 
+      hsl(280 60% 12%) 100%
+    );
+  }
+
+  .gradient-bg-celebration {
+    background: linear-gradient(135deg,
+      hsl(280 70% 10%) 0%,
+      hsl(320 60% 20%) 30%,
+      hsl(350 50% 15%) 60%,
+      hsl(270 60% 15%) 100%
+    );
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(330 85% 65%), hsl(45 100% 65%), hsl(330 85% 65%));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 3s ease-in-out infinite;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, hsl(45 100% 60%), hsl(35 100% 75%), hsl(50 100% 65%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .btn-glow {
+    box-shadow: 0 0 20px hsla(330, 85%, 60%, 0.4), 0 0 60px hsla(330, 85%, 60%, 0.15);
+    transition: box-shadow 0.3s;
+  }
+  .btn-glow:hover {
+    box-shadow: 0 0 30px hsla(330, 85%, 60%, 0.6), 0 0 80px hsla(330, 85%, 60%, 0.25);
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 200% center; }
+  }
+
+  @keyframes star-twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+}
