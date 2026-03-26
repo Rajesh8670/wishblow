@@ -80,5 +80,5 @@ export const decodeBirthdayData = (encoded: string): ShareableBirthdayData | nul
 export const buildShareUrl = (data: ShareableBirthdayData): string => {
   const encoded = encodeBirthdayData(data);
   const base = window.location.origin;
-  return `${base}/celebrate#d=${encoded}`;
+  return `${base}/#/celebrate?d=${encoded}`;
 };
