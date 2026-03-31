@@ -68,20 +68,34 @@ app.get("*", (_req, res) => {
 });
 
 const start = async () => {
+  console.log("🚀 Starting Wishblow API server...");
+  console.log(`📍 PORT: ${PORT}`);
+  console.log(`📍 NODE_ENV: ${process.env.NODE_ENV || "development"}`);
+  
   if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI is not set. Add it to your environment before starting the server.");
+    const error = "❌ MONGODB_URI is not set. Add it to your Render environment variables.";
+    console.error(error);
+    throw new Error(error);
   }
 
-  await mongoose.connect(MONGODB_URI, {
-    dbName: process.env.MONGODB_DB || "wishblow"
-  });
+  console.log("🔗 Connecting to MongoDB...");
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      dbName: process.env.MONGODB_DB || "wishblow"
+    });
+    console.log("✅ MongoDB connected successfully");
+  } catch (mongoError) {
+    console.error("❌ MongoDB connection failed:", mongoError);
+    throw mongoError;
+  }
 
   app.listen(PORT, () => {
-    console.log(`Wishblow API running on http://localhost:${PORT}`);
+    console.log(`✅ Wishblow API running on port ${PORT}`);
+    console.log(`🌐 Access at: http://localhost:${PORT}`);
   });
 };
 
 start().catch((error) => {
-  console.error("Failed to start server:", error);
+  console.error("❌ Failed to start server:", error.message);
   process.exit(1);
 });
