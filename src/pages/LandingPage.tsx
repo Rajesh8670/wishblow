@@ -4,9 +4,11 @@ import { Cake, PartyPopper, Sparkles, Music, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfettiCanvas } from "@/components/birthday/ConfettiCanvas";
 import { FloatingBalloons } from "@/components/birthday/FloatingBalloons";
+import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  useBackgroundMusic();
 
   return (
     <div className="gradient-bg relative flex min-h-screen items-center justify-center overflow-hidden">

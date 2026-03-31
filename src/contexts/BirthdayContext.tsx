@@ -4,6 +4,8 @@ export interface BirthdayData {
   name: string;
   age: number;
   message: string;
+  senderName: string;
+  relationshipTag: string;
   photoUrl: string | null;
   memoryPhotos: string[];
   wishText: string;

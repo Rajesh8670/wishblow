@@ -1,7 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
 
 const NotFound = () => {
+  useBackgroundMusic();
   const location = useLocation();
 
   useEffect(() => {

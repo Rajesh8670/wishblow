@@ -5,8 +5,10 @@ import { QRCodeCanvas } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { useBirthday } from "@/contexts/BirthdayContext";
 import { useNavigate } from "react-router-dom";
+import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
 
 const SharePage = () => {
+  useBackgroundMusic();
   const { data, shareUrl } = useBirthday();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);

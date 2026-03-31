@@ -2,11 +2,18 @@ export interface ShareableBirthdayData {
   name: string;
   age: number;
   message: string;
+  senderName?: string;
+  relationshipTag?: string;
   photoUrl: string | null;
   memoryPhotos: string[];
   wishText: string;
   bgmUrl?: string | null;
 }
+
+export const buildCelebrationUrl = (celebrationId: string): string => {
+  const base = window.location.origin;
+  return `${base}/#/celebrate/${celebrationId}`;
+};
 
 const toBase64Url = (value: string): string =>
   btoa(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
@@ -58,6 +65,8 @@ export const decodeBirthdayData = (encoded: string): ShareableBirthdayData | nul
     const parsed = JSON.parse(json);
     return {
       ...parsed,
+      senderName: parsed.senderName || "",
+      relationshipTag: parsed.relationshipTag || "",
       memoryPhotos: parsed.memoryPhotos || [],
       wishText: parsed.wishText || parsed.message || "",
     };
@@ -68,6 +77,8 @@ export const decodeBirthdayData = (encoded: string): ShareableBirthdayData | nul
       const parsed = JSON.parse(json);
       return {
         ...parsed,
+        senderName: parsed.senderName || "",
+        relationshipTag: parsed.relationshipTag || "",
         memoryPhotos: parsed.memoryPhotos || [],
         wishText: parsed.wishText || parsed.message || "",
       };

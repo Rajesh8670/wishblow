@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Heart, Sparkles, Home, PartyPopper, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBirthday } from "@/contexts/BirthdayContext";
+import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
 
 // Convert Google Drive link to direct image URL
 const convertToDirectImageUrl = (url: string): string => {
@@ -203,24 +204,66 @@ const MagicalSparkles = () => (
   </div>
 );
 
+const WishSenderSignature = ({
+  senderName,
+  relationshipTag,
+}: {
+  senderName?: string;
+  relationshipTag?: string;
+}) => {
+  if (!senderName && !relationshipTag) {
+    return null;
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.9 }}
+      className="mt-5 flex justify-center"
+    >
+      <div className="relative overflow-hidden rounded-[1.4rem] border border-white/15 bg-gradient-to-r from-primary/18 via-white/8 to-accent/18 px-5 py-3 shadow-[0_14px_35px_rgba(255,107,157,0.18)] backdrop-blur-xl">
+        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {relationshipTag && (
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-accent">
+              {relationshipTag}
+            </span>
+          )}
+          {senderName && (
+            <span className="text-gradient font-display text-lg font-bold drop-shadow-[0_2px_14px_rgba(255,107,157,0.25)]">
+              From {senderName}
+            </span>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 const WishRevealPage = () => {
   const navigate = useNavigate();
   const { data } = useBirthday();
   const musicRef = useRef<{ stop: () => void } | null>(null);
   const [showContent, setShowContent] = useState(false);
+  const wishAudioPath = "/happy-birthday.webm";
+  const wishVolume = 0.35;
+  useBackgroundMusic(wishAudioPath, Boolean(data), wishVolume);
 
   useEffect(() => {
     if (!data) {
       navigate("/");
       return;
     }
-    const timer = setTimeout(() => {
-      musicRef.current = playNostalgicMelody();
+    const timer = window.setTimeout(() => {
+      if (!data.bgmUrl) {
+        musicRef.current = playNostalgicMelody();
+      }
     }, 600);
     const contentTimer = setTimeout(() => setShowContent(true), 300);
 
     return () => {
-      clearTimeout(timer);
+      window.clearTimeout(timer);
       clearTimeout(contentTimer);
       musicRef.current?.stop();
     };
@@ -329,6 +372,7 @@ const WishRevealPage = () => {
               <p className="mt-3 text-xl font-bold text-primary/90">
                 Turning {data.age} today! <motion.span className="inline-block" animate={{ y: [0, -8, 0] }} transition={{ duration: 0.8, repeat: Infinity }}>🎉</motion.span>
               </p>
+              <WishSenderSignature senderName={data.senderName} relationshipTag={data.relationshipTag} />
             </motion.div>
 
             {/* Beautiful Divider */}
@@ -434,6 +478,12 @@ const WishRevealPage = () => {
                   >
                     <Heart className="mx-auto h-8 w-8 fill-primary/60 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]" />
                   </motion.div>
+                  {(data.senderName || data.relationshipTag) && (
+                    <p className="mb-4 text-sm font-semibold tracking-[0.12em] text-foreground/65">
+                      {data.relationshipTag ? `${data.relationshipTag} ` : ""}
+                      {data.senderName ? `From ${data.senderName}` : ""}
+                    </p>
+                  )}
                   
                   {/* Emojis */}
                   <motion.div

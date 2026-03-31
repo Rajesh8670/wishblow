@@ -25,6 +25,7 @@ const App = () => (
             <Route path="/create" element={<InputFormPage />} />
             <Route path="/share" element={<SharePage />} />
             <Route path="/celebrate" element={<CelebrationPage />} />
+            <Route path="/celebrate/:celebrationId" element={<CelebrationPage />} />
             <Route path="/wish" element={<WishRevealPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

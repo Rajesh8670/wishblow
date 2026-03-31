@@ -1,6 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Wind, Scissors, Volume2, VolumeX, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBirthday } from "@/contexts/BirthdayContext";
@@ -9,56 +9,47 @@ import { ConfettiCanvas } from "@/components/birthday/ConfettiCanvas";
 import { FloatingBalloons } from "@/components/birthday/FloatingBalloons";
 import { FireworksCanvas } from "@/components/birthday/FireworksCanvas";
 import { useMicrophone } from "@/hooks/useMicrophone";
+import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
+import { getCelebration } from "@/lib/celebrations";
 import { decodeBirthdayData } from "@/lib/shareUtils";
 
 type Phase = "candles" | "blow" | "cut" | "celebration";
 
-const playBirthdayMelody = (): { stop: () => void } => {
-  try {
-    const ctx = new AudioContext();
-    const gainNode = ctx.createGain();
-    gainNode.gain.value = 0.15;
-    gainNode.connect(ctx.destination);
-
-    const melody: [number, number][] = [
-      [262, 0.3], [262, 0.3], [294, 0.6], [262, 0.6], [349, 0.6], [330, 1.0],
-      [262, 0.3], [262, 0.3], [294, 0.6], [262, 0.6], [392, 0.6], [349, 1.0],
-      [262, 0.3], [262, 0.3], [523, 0.6], [440, 0.6], [349, 0.6], [330, 0.6], [294, 1.0],
-      [466, 0.3], [466, 0.3], [440, 0.6], [349, 0.6], [392, 0.6], [349, 1.0],
-    ];
-
-    let time = ctx.currentTime + 0.1;
-    const oscillators: OscillatorNode[] = [];
-
-    for (const [freq, dur] of melody) {
-      const osc = ctx.createOscillator();
-      const noteGain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      noteGain.gain.setValueAtTime(0, time);
-      noteGain.gain.linearRampToValueAtTime(0.3, time + 0.05);
-      noteGain.gain.linearRampToValueAtTime(0, time + dur - 0.05);
-      osc.connect(noteGain);
-      noteGain.connect(gainNode);
-      osc.start(time);
-      osc.stop(time + dur);
-      oscillators.push(osc);
-      time += dur;
-    }
-
-    return {
-      stop: () => {
-        oscillators.forEach((o) => { try { o.stop(); } catch {} });
-        ctx.close();
-      },
-    };
-  } catch {
-    return { stop: () => {} };
+const SenderSignature = ({
+  senderName,
+  relationshipTag,
+}: {
+  senderName?: string;
+  relationshipTag?: string;
+}) => {
+  if (!senderName && !relationshipTag) {
+    return null;
   }
+
+  return (
+    <div className="mt-4 flex justify-center">
+      <div className="relative overflow-hidden rounded-[1.25rem] border border-white/15 bg-gradient-to-r from-primary/18 via-background/35 to-accent/18 px-5 py-3 shadow-[0_10px_30px_rgba(255,107,157,0.18)] backdrop-blur-md">
+        <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+        <div className="flex flex-wrap items-center justify-center gap-2 text-center">
+          {relationshipTag && (
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-accent">
+              {relationshipTag}
+            </span>
+          )}
+          {senderName && (
+            <p className="text-gradient font-display text-lg font-bold drop-shadow-[0_2px_14px_rgba(255,107,157,0.25)]">
+              From {senderName}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const CelebrationPage = () => {
   const navigate = useNavigate();
+  const { celebrationId } = useParams();
   const [searchParams] = useSearchParams();
   const { data, setData } = useBirthday();
   const [phase, setPhase] = useState<Phase>("candles");
@@ -68,52 +59,70 @@ const CelebrationPage = () => {
   const [showKnife, setShowKnife] = useState(false);
   const [cakeCut, setCakeCut] = useState(false);
   const [bgMusicPlaying, setBgMusicPlaying] = useState(false);
-  const bgMusicRef = useRef<{ stop: () => void } | null>(null);
+  const celebrationAudioPath = data?.bgmUrl || "/happy-birthday.webm";
+  const celebrationVolume = data?.bgmUrl ? 0.85 : 0.35;
+  const { play, pause } = useBackgroundMusic(celebrationAudioPath, Boolean(data), celebrationVolume);
 
   useEffect(() => {
     if (!data) {
-      const hashEncoded = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("d");
-      const queryEncoded = searchParams.get("d");
-      const encoded = hashEncoded || queryEncoded;
-
-      if (encoded) {
-        const decoded = decodeBirthdayData(encoded);
-        if (decoded) {
-          setData({
-            name: decoded.name,
-            age: decoded.age,
-            message: decoded.message,
-            photoUrl: decoded.photoUrl,
-            memoryPhotos: decoded.memoryPhotos || [],
-            wishText: decoded.wishText || decoded.message,
-            audioUrl: null,
-            bgmUrl: decoded.bgmUrl || null,
-          });
-          return;
+      const loadCelebration = async () => {
+        if (celebrationId) {
+          try {
+            const celebration = await getCelebration(celebrationId);
+            setData({
+              name: celebration.name,
+              age: celebration.age,
+              message: celebration.message,
+              senderName: celebration.senderName || "",
+              relationshipTag: celebration.relationshipTag || "",
+              photoUrl: celebration.photoUrl,
+              memoryPhotos: celebration.memoryPhotos || [],
+              wishText: celebration.wishText || celebration.message,
+              audioUrl: celebration.audioUrl || null,
+              bgmUrl: celebration.bgmUrl || null,
+            });
+            return;
+          } catch {
+            navigate("/");
+            return;
+          }
         }
-      }
-      navigate("/");
+
+        const hashEncoded = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("d");
+        const queryEncoded = searchParams.get("d");
+        const encoded = hashEncoded || queryEncoded;
+
+        if (encoded) {
+          const decoded = decodeBirthdayData(encoded);
+          if (decoded) {
+            setData({
+              name: decoded.name,
+              age: decoded.age,
+              message: decoded.message,
+              senderName: decoded.senderName || "",
+              relationshipTag: decoded.relationshipTag || "",
+              photoUrl: decoded.photoUrl,
+              memoryPhotos: decoded.memoryPhotos || [],
+              wishText: decoded.wishText || decoded.message,
+              audioUrl: null,
+              bgmUrl: decoded.bgmUrl || null,
+            });
+            return;
+          }
+        }
+
+        navigate("/");
+      };
+
+      void loadCelebration();
     }
-  }, [data, searchParams, setData, navigate]);
+  }, [celebrationId, data, searchParams, setData, navigate]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (data?.bgmUrl) {
-        const audio = new Audio(data.bgmUrl);
-        audio.loop = true;
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
-        bgMusicRef.current = { stop: () => { audio.pause(); audio.src = ""; } };
-      } else {
-        bgMusicRef.current = playBirthdayMelody();
-      }
+    if (data) {
       setBgMusicPlaying(true);
-    }, 500);
-    return () => {
-      clearTimeout(timer);
-      bgMusicRef.current?.stop();
-    };
-  }, [data?.bgmUrl]);
+    }
+  }, [data, celebrationAudioPath]);
 
   const handleBlowComplete = useCallback(() => {
     setFlickering(false);
@@ -156,20 +165,14 @@ const CelebrationPage = () => {
 
   const toggleBgMusic = () => {
     if (bgMusicPlaying) {
-      bgMusicRef.current?.stop();
-      bgMusicRef.current = null;
+      pause();
       setBgMusicPlaying(false);
     } else {
-      if (data?.bgmUrl) {
-        const audio = new Audio(data.bgmUrl);
-        audio.loop = true;
-        audio.volume = 0.3;
-        audio.play().catch(() => {});
-        bgMusicRef.current = { stop: () => { audio.pause(); audio.src = ""; } };
-      } else {
-        bgMusicRef.current = playBirthdayMelody();
-      }
-      setBgMusicPlaying(true);
+      Promise.resolve(play()).then(() => {
+        setBgMusicPlaying(true);
+      }).catch(() => {
+        setBgMusicPlaying(false);
+      });
     }
   };
 
@@ -218,6 +221,7 @@ const CelebrationPage = () => {
             <p className="mt-1 text-xl font-bold text-accent">
               Turning {data.age} <span className="inline-block animate-bounce">🎉</span>
             </p>
+            <SenderSignature senderName={data.senderName} relationshipTag={data.relationshipTag} />
           </div>
         </motion.div>
 
