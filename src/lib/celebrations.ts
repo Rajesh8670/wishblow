@@ -7,6 +7,9 @@ export interface CelebrationRecord extends BirthdayData {
 const API_BASE_URL =
   import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
   (typeof window !== "undefined" && window.location.port === "8080" ? "http://localhost:4000" : "");
+// When deployed on same server: uses relative URLs ("/api/...")
+// When in development: uses http://localhost:4000
+// When VITE_API_URL is set: uses that URL
 
 const parseJsonResponse = async <T>(response: Response): Promise<T> => {
   const raw = await response.text();

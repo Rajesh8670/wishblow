@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const path = require("path");
 const Celebration = require("./models/Celebration.cjs");
 
 dotenv.config();
@@ -12,6 +13,10 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
+
+// Serve static files from dist folder
+const distPath = path.join(__dirname, "../dist");
+app.use(express.static(distPath));
 
 app.get("/api/health", async (_req, res) => {
   const mongoState = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
@@ -55,6 +60,11 @@ app.get("/api/celebrations/:id", async (req, res) => {
       error: error instanceof Error ? error.message : "Failed to load celebration"
     });
   }
+});
+
+// Fallback to index.html for SPA routing
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(distPath, "index.html"));
 });
 
 const start = async () => {
