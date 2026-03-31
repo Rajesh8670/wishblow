@@ -25,7 +25,7 @@ import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
 import { useToast } from "@/hooks/use-toast";
 import { createCelebration } from "@/lib/celebrations";
 import { uploadAudioToCloudinary, uploadToCloudinary, optimizedUrl } from "@/lib/cloudinary";
-import { buildCelebrationUrl } from "@/lib/shareUtils";
+import { buildCelebrationUrl, buildShareUrl } from "@/lib/shareUtils";
 
 const relationshipOptions = [
   "Friend",
@@ -196,9 +196,20 @@ const InputFormPage = () => {
         bgmUrl,
       };
 
-      const created = await createCelebration(birthdayData);
       setData(birthdayData);
-      const url = buildCelebrationUrl(created.id);
+      let url: string;
+
+      try {
+        const created = await createCelebration(birthdayData);
+        url = buildCelebrationUrl(created.id);
+      } catch (err: any) {
+        url = buildShareUrl(birthdayData);
+        toast({
+          title: "Share link created",
+          description:
+            err?.message || "Backend was unavailable, so a direct share link was generated instead.",
+        });
+      }
 
       setShareUrl(url);
       navigate("/share");

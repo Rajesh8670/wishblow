@@ -532,7 +532,6 @@ const WishRevealPage = () => {
                   <PartyPopper className="mr-2 h-4 w-4" /> Create My Own
                 </Button>
               </div>
-              <p className="text-xs text-foreground/40">Made with 💖</p>
             </motion.div>
           </motion.div>
         )}
@@ -542,3 +541,4 @@ const WishRevealPage = () => {
 };
 
 export default WishRevealPage;
+
