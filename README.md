@@ -42,17 +42,6 @@ Create a `.env` file in the root directory:
 cp .env.example .env
 ```
 
-Then update `.env` with your MongoDB credentials:
-```env
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/WishBlow?retryWrites=true&w=majority
-MONGODB_DB=WishBlow
-PORT=4000
-```
-
-### 4. Setup MongoDB
-- Create a MongoDB Atlas account at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
-- Create a new cluster and database named `WishBlow`
-- Generate database credentials and update `.env`
 
 ## Running the Application
 
